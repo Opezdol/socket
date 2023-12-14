@@ -68,6 +68,12 @@ async def main():
                     print(f"My relation LTC/ DASH {last_ltc/last_dash}")
                     print(f"My relation LTC/ ATOM {last_ltc/last_atom}")
                     print(f"My relation LTC/ DOGE {last_ltc/last_doge}")
+                    print("_")
+                    print(f"My relation DASH/ ADA {last_dash/res.last}")
+                    print(f"My relation DASH/ DOGE {last_dash/last_doge}")
+                    print(f"My relation DASH/ ATOM {last_dash/last_atom}")
+                    print("_")
+                    print(f"My relation ADA/ DOGE {res.last/last_doge}")
 
 
 if __name__ == "__main__":
