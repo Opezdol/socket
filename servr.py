@@ -34,6 +34,7 @@ async def main():
         dict(channel="tickers", instId="ADA-USDT"),
         dict(channel="tickers", instId="ATOM-USDT"),
         dict(channel="tickers", instId="DOGE-USDT"),
+        dict(channel="tickers", instId="ALGO-USDT"),
     ]
     async with websockets.connect(url) as ws:
         print(f"Connected: {datetime.now().isoformat()[11:19]}")
@@ -46,6 +47,7 @@ async def main():
         last_ada = 1
         last_atom = 1
         last_doge = 1
+        last_algo = 1
 
         await ws.send(json.dumps(subs))
         async for msg in ws:
@@ -62,18 +64,28 @@ async def main():
                     last_atom = res.last
                 elif res.instId == "DOGE-USDT":
                     last_doge = res.last
+                elif res.instId == "ALGO-USDT":
+                    last_algo = res.last
                 else:
                     print(f"_____________{res.ts.isoformat()[11:19]}__________")
-                    print(f"My relation LTC/ ADA {last_ltc/res.last}")
-                    print(f"My relation LTC/ DASH {last_ltc/last_dash}")
-                    print(f"My relation LTC/ ATOM {last_ltc/last_atom}")
-                    print(f"My relation LTC/ DOGE {last_ltc/last_doge}")
-                    print("_")
-                    print(f"My relation DASH/ ADA {last_dash/res.last}")
-                    print(f"My relation DASH/ DOGE {last_dash/last_doge}")
-                    print(f"My relation DASH/ ATOM {last_dash/last_atom}")
-                    print("_")
-                    print(f"My relation ADA/ DOGE {res.last/last_doge}")
+                    print("__ LTC __ ")
+                    print(f"My relation LTC/ ADA  {last_ltc/res.last:.2f}")
+                    print(f"My relation LTC/ DASH {last_ltc/last_dash:.2f}")
+                    print(f"My relation LTC/ ATOM {last_ltc/last_atom:.2f}")
+                    print(f"My relation LTC/ DOGE {last_ltc/last_doge:.2f}")
+                    print(f"My relation LTC/ ALGO {last_ltc/last_algo:.2f}")
+                    print("__ DASH __ ")
+                    print(f"My relation DASH/ ADA  {last_dash/res.last:.2f}")
+                    print(f"My relation DASH/ DOGE {last_dash/last_doge:.2f}")
+                    print(f"My relation DASH/ ATOM {last_dash/last_atom:.2f}")
+                    print(f"My relation DASH/ ALGO {last_dash/last_algo:.2f}")
+                    print("__ ADA __ ")
+                    print(f"My relation ADA/ DOGE {res.last/last_doge:.2f}")
+                    print(f"My relation ADA/ ALGO {res.last/last_algo:.2f}")
+                    print("__ ATOM __ ")
+                    print(f"My relation ATOM/ ADA  {last_atom/res.last:.2f}")
+                    print(f"My relation ATOM/ DOGE {last_atom/last_doge:.2f}")
+                    print(f"My relation ATOM/ ALGO {last_atom/last_algo:.2f}")
 
 
 if __name__ == "__main__":
