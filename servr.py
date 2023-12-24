@@ -6,6 +6,7 @@ from pydantic import BaseModel
 import json
 import websockets
 import asyncio
+from user import User_Thread
 
 
 class Msg(BaseModel):
