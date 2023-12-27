@@ -36,6 +36,21 @@ class Market(BaseModel):
         for key in points:
             self.pnt.update({key: Point(name=key)})
 
+    # def model_post_init(self, __context: Any):
+    #     # Ok, we take pairs, split them to coins, and filter out base coin
+    #     points = {
+    #         coin
+    #         for pair in self.pairs
+    #         for coin in pair.split(sep="-")
+    #         if not coin == self.base
+    #     }
+    #     self.points = points  ####### Maybe also dont need !!!!!!!!!!!!!!
+    #     # print (self.points)
+    #     for key in points:
+    #         self.pnt.update({key: Point(name=key)})
+    #
+    #     # return super().model_post_init(__context)
+
     def __getitem__(self, key: str) -> float:
         """Get last price of instrumen on market"""
         return self.pnt[key].price
@@ -49,8 +64,8 @@ class Market(BaseModel):
 class RelativeModel(BaseModel):
     relations: dict[str, set] = Field(repr=False)
     db: dict[str, dict[str, float]] = Field(default={}, repr=True)
-    _index: dict[int, tuple[str, str]] = {}
-    user_relation: dict[int, float] = {}
+    _index: dict[int, str] = {}
+    user_relation: dict[str, float] = {}
 
     def __init__(self, **data) -> None:
         super().__init__(**data)
@@ -61,9 +76,10 @@ class RelativeModel(BaseModel):
         for pnt1 in self.relations.keys():
             self.db[pnt1] = {}
             for pnt2 in self.relations[pnt1]:
+                key = pnt1 + "@" + pnt2
                 self.db[pnt1][pnt2] = 1.0
-                self._index[int(ind)] = (pnt1, pnt2)
-                self.user_relation[int(ind)] = 1.0
+                self._index[int(ind)] = key
+                self.user_relation[key] = 1.0
                 ind += 1.0
         self.load_user()
 
@@ -81,7 +97,7 @@ class RelativeModel(BaseModel):
             with open("./usr_data.json", mode="r") as f:
                 data = json.load(f)
                 for key, value in data["user_relation"].items():
-                    self.fill_user(ind=int(key), value=value)
+                    self.user_relation[key] = value
         except Exception as e:
             print(f"ERROR: {e}, during load_user function")
 
@@ -90,7 +106,8 @@ class RelativeModel(BaseModel):
             self.user_relation[key] = 0.0
 
     def fill_user(self, ind: int, value: float):
-        self.user_relation[ind] = value
+        key = self._index[ind]
+        self.user_relation[key] = value
         self.save_user()
 
     def __str__(self) -> str:
@@ -100,10 +117,9 @@ class RelativeModel(BaseModel):
         res += "Ind |   Ins#1/Ins#2  | Relation   | Usr_rel | Usr_rel/Relation \n"
         res += "_______________________________________________________________\n"
         for ind, val in self._index.items():
-            pnt1 = val[0]
-            pnt2 = val[1]
+            pnt1, pnt2 = val.split(sep="@")
             relation = self.db[pnt1][pnt2]
-            user_relation = self.user_relation[ind]
+            user_relation = self.user_relation[val]
             res += f"{ind:>3} |\t{pnt1:>4} / {pnt2:<5} |{relation:10.3f}  |{user_relation:8} |\t{user_relation/relation:6.5f}\n"
 
         return res

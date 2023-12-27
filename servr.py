@@ -90,7 +90,7 @@ async def get_user_cmd(r: RelativeModel) -> None:
             print(f"ERROR: {e} during conversion to intger @: self.get_user_cmd")
             if cmd == "q":
                 r.save_user()
-                loop = asyncio.get_running_loop()
+                loop = asyncio.get_event_loop()
                 loop.stop()
                 loop.close()
                 print("Bye!")
