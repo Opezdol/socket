@@ -1,3 +1,9 @@
+## My Personal ignores ##
+*_exmpl.py
+*.json
+
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

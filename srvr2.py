@@ -1,7 +1,15 @@
 import asyncio
-from user_thread import User_Thread
+import os
+import websockets
+import json
 from pydantic import BaseModel, Field
 from datetime import datetime
+
+# My handcrafted classes
+###########################
+from data_input import Data
+from db_model import Market, RelativeModel
+from user_thread import User_Thread
 
 ######## My globbal constants #######
 url = "wss://ws.okx.com:8443/ws/v5/public"
@@ -14,62 +22,101 @@ params = (
     "DOGE-USDT",
     "ALGO-USDT",
 )
+test_params = (
+    "BCH-USDT",
+    "XRP-USDT",
+    "DOT-USDT",
+)
+## TODO
+## ADD%
+## LTC/XPR ATOM/DOT ATOM/XRP LTC/BCH ATOM/BCH
 
 relations = {
-    "LTC": ("ADA", "DASH", "ATOM", "DOGE", "ALGO"),
-    "DASH": ("ADA", "DOGE", "ATOM", "ALGO"),
-    "ADA": ("DOGE", "ALGO"),
-    "ATOM": ("ADA", "DOGE", "ALGO"),
+    ## dict[str:set]
+    "LTC": {"ADA", "DASH", "ATOM", "DOGE", "ALGO"},
+    "DASH": {"ADA", "DOGE", "ATOM", "ALGO"},
+    "ADA": {"DOGE", "ALGO"},
+    "ATOM": {"ADA", "DOGE", "ALGO"},
 }
 ######### Global def end ###########
 
 
-class Point(BaseModel):
-    """
-    One intrument reads as point in BaseMarket
-    """
-
-    name: str
-    instId: str | None = Field(default=None, repr=False)
-    last_price: float = 0
-
-
-class Market(BaseModel):
-    base: str = Field(default="USDT", repr=False)
-    ts: datetime = Field(default=datetime.now(), repr=True)
-    pnt: dict[str, Point] = Field(default=dict(), repr=True)
-    points: set[str] = Field(default=set(), repr=False)
-
-    def __init__(self, pairs: tuple, **data) -> None:
-        super().__init__(**data)
-        # that was sexy I thought...
-        # Ok, we take pairs, split them to coins, and filter out base coin
-        points = {
-            coin
-            for pair in pairs
-            for coin in pair.split(sep="-")
-            if not coin == self.base
-        }
-        self.points = points
-        # print (self.points)
-        for key in self.points:
-            self.pnt.update({key: Point(name=key)})
-            # setattr(self, key, Point(name=key))
-        # print(self)
-
-    def __getitem__(self, key: str) -> float:
-        """Get last price of instrumen on market"""
-        return self.pnt[key].last_price
-
-    def __setitem__(self, name: str, value: float) -> None:
-        """Update last price of instrument over market"""
-        self.ts = datetime.now()
-        self.pnt[name].last_price = value
+async def subscribe(params: set, ws: websockets.WebSocketClientProtocol) -> None:
+    req = [dict(channel="tickers", instId=name) for name in params]
+    subs = dict(
+        op="subscribe",
+        args=req,
+    )
+    await ws.send(json.dumps(subs))
+    async for msg in ws:
+        print(msg)
+        break
 
 
-m = Market(pairs=params)
-print(f"Before: \n{m}")
-m["DOGE"] = 123129.00
-m["LTC"] = 875
-m["ADA"] = 8879
-print(f"After: \n{m}")
+async def listen_market(m: Market) -> None:
+    async with websockets.connect(url) as ws:
+        # subscribe to SPOT channel
+        await subscribe(m.pairs, ws)
+        print(f"Connected: {datetime.now().isoformat()[11:19]}")
+        # on recv messages
+        async for msg in ws:
+            data = Data().model_validate_json(msg)
+            if data.data:
+                message = data.data[0]
+                # save value of recvd info to market snapshot
+                m[message.key] = message.last
+                # print(f"Key: {message.key}, value {message.last}")
+                # print(m)
+
+
+async def print_market(m: Market, r: RelativeModel) -> None:
+    while True:
+        r.fill(m)
+        os.system("clear")
+        print(r)
+        await asyncio.sleep(2)
+
+
+async def _user_raw() -> str:
+    async for cmd in User_Thread():
+        return cmd
+
+
+async def get_user_cmd(r: RelativeModel) -> None:
+    while True:
+        cmd = await _user_raw()
+        try:
+            vctr = int(cmd)
+            value = await _user_raw()
+            r.fill_user(ind=vctr, value=float(value))
+        except Exception as e:
+            print(f"ERROR: {e} during conversion to intger @: self.get_user_cmd")
+            if cmd == "q":
+                r.save_user()
+                loop = asyncio.get_running_loop()
+                loop.stop()
+                loop.close()
+                print("Bye!")
+            elif cmd == "c":
+                r.clear_user()
+                print("User values cleared!!")
+            else:
+                print("I dont know that command. ")
+
+
+async def main():
+    m = Market(pairs=params)
+    r = RelativeModel(relations=relations)
+    await asyncio.gather(listen_market(m), print_market(m, r), get_user_cmd(r))
+
+
+def test_Market():
+    m = Market(pairs=test_params)
+    print(f"Before: \n{m}")
+    m["DOGE"] = 123129.00
+    m["LTC"] = 875
+    m["ADA"] = 8879
+    print(f"After: \n{m}")
+
+
+asyncio.run(main())

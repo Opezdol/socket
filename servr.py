@@ -9,24 +9,6 @@ import asyncio
 from user import User_Thread
 
 
-class Msg(BaseModel):
-    ts: datetime
-    instType: str
-    instId: str
-    last: float
-    lastSz: float
-    askPx: float
-    askSz: float
-    bidPx: float
-    bidSz: float
-
-
-class Data(BaseModel):
-    event: str | None = None
-    arg: dict | None = None
-    data: list[Msg] | None = None
-
-
 async def main():
     url = "wss://ws.okx.com:8443/ws/v5/public"
     params = [
@@ -77,8 +59,8 @@ async def main():
                     print(f"My relation LTC/ ALGO {last_ltc/last_algo:.2f}")
                     print("__ DASH __ ")
                     print(f"My relation DASH/ ADA  {last_dash/res.last:.2f}")
-                    print(f"My relation DASH/ DOGE {last_dash/last_doge:.2f}")
-                    print(f"My relation DASH/ ATOM {last_dash/last_atom:.2f}")
+        print(f"My relation DASH/ DOGE {last_dash/last_doge:.2f}")
+        print(f"My relation DASH/ ATOM {last_dash/last_atom:.2f}")
                     print(f"My relation DASH/ ALGO {last_dash/last_algo:.2f}")
                     print("__ ADA __ ")
                     print(f"My relation ADA/ DOGE {res.last/last_doge:.2f}")
