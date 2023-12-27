@@ -1,75 +1,110 @@
-# from .moneda import Pair
-from datetime import datetime
-from typing import Optional
-from fastapi import FastAPI
-from pydantic import BaseModel
-import json
-import websockets
 import asyncio
-from user import User_Thread
+import os
+import websockets
+import json
+from datetime import datetime
+
+# My handcrafted classes
+###########################
+from data_input import Data
+from db_model import Market, RelativeModel
+from user_thread import User_Thread
+
+######## My globbal constants #######
+url = "wss://ws.okx.com:8443/ws/v5/public"
+instrm_url = "https://www.okx.com/api/v5/public/instruments"
+params = (
+    "DASH-USDT",
+    "LTC-USDT",
+    "ADA-USDT",
+    "ATOM-USDT",
+    "DOGE-USDT",
+    "ALGO-USDT",
+    "BCH-USDT",
+    "XRP-USDT",
+    "DOT-USDT",
+)
+## TODO
+## ADD%
+## LTC/XPR ATOM/DOT ATOM/XRP LTC/BCH ATOM/BCH
+
+relations = {
+    ## dict[str:set]
+    "LTC": {"ADA", "DASH", "ATOM", "DOGE", "ALGO", "XRP", "BCH"},
+    "ATOM": {"ADA", "DOGE", "ALGO", "DOT", "XRP", "BCH"},
+    "DASH": {"ADA", "DOGE", "ATOM", "ALGO"},
+    "ADA": {"DOGE", "ALGO"},
+}
+######### Global def end ###########
+
+
+async def subscribe(params: set, ws: websockets.WebSocketClientProtocol) -> None:
+    req = [dict(channel="tickers", instId=name) for name in params]
+    subs = dict(
+        op="subscribe",
+        args=req,
+    )
+    await ws.send(json.dumps(subs))
+    async for msg in ws:
+        print(msg)
+        break
+
+
+async def listen_market(m: Market) -> None:
+    async with websockets.connect(url) as ws:
+        # subscribe to SPOT channel
+        await subscribe(m.pairs, ws)
+        print(f"Connected: {datetime.now().isoformat()[11:19]}")
+        # on recv messages
+        async for msg in ws:
+            data = Data().model_validate_json(msg)
+            if data.data:
+                message = data.data[0]
+                # save value of recvd info to market snapshot
+                m[message.key] = message.last
+                # print(f"Key: {message.key}, value {message.last}")
+                # print(m)
+
+
+async def print_market(m: Market, r: RelativeModel) -> None:
+    while True:
+        r.fill(m)
+        os.system("clear")
+        print(r)
+        await asyncio.sleep(2)
+
+
+async def _user_raw() -> str:
+    async for cmd in User_Thread():
+        return cmd
+
+
+async def get_user_cmd(r: RelativeModel) -> None:
+    while True:
+        cmd = await _user_raw()
+        try:
+            vctr = int(cmd)
+            value = await _user_raw()
+            r.fill_user(ind=vctr, value=float(value))
+        except Exception as e:
+            print(f"ERROR: {e} during conversion to intger @: self.get_user_cmd")
+            if cmd == "q":
+                r.save_user()
+                loop = asyncio.get_running_loop()
+                loop.stop()
+                loop.close()
+                print("Bye!")
+            elif cmd == "c":
+                r.clear_user()
+                print("User values cleared!!")
+            else:
+                print("I dont know that command. ")
 
 
 async def main():
-    url = "wss://ws.okx.com:8443/ws/v5/public"
-    params = [
-        dict(channel="tickers", instId="DASH-USDT"),
-        dict(channel="tickers", instId="LTC-USDT"),
-        dict(channel="tickers", instId="ADA-USDT"),
-        dict(channel="tickers", instId="ATOM-USDT"),
-        dict(channel="tickers", instId="DOGE-USDT"),
-        dict(channel="tickers", instId="ALGO-USDT"),
-    ]
-    async with websockets.connect(url) as ws:
-        print(f"Connected: {datetime.now().isoformat()[11:19]}")
-        subs = dict(
-            op="subscribe",
-            args=params,
-        )
-        last_ltc = 1
-        last_dash = 1
-        last_ada = 1
-        last_atom = 1
-        last_doge = 1
-        last_algo = 1
-
-        await ws.send(json.dumps(subs))
-        async for msg in ws:
-            # print(json.dumps(msg))
-            # recived messages with Msg data shoud be send to sorting of monedas
-            res = Data.model_validate_json(msg)
-            if res.data:
-                res = res.data[0]
-                if res.instId == "DASH-USDT":
-                    last_dash = res.last
-                elif res.instId == "LTC-USDT":
-                    last_ltc = res.last
-                elif res.instId == "ATOM-USDT":
-                    last_atom = res.last
-                elif res.instId == "DOGE-USDT":
-                    last_doge = res.last
-                elif res.instId == "ALGO-USDT":
-                    last_algo = res.last
-                else:
-                    print(f"_____________{res.ts.isoformat()[11:19]}__________")
-                    print("__ LTC __ ")
-                    print(f"My relation LTC/ ADA  {last_ltc/res.last:.2f}")
-                    print(f"My relation LTC/ DASH {last_ltc/last_dash:.2f}")
-                    print(f"My relation LTC/ ATOM {last_ltc/last_atom:.2f}")
-                    print(f"My relation LTC/ DOGE {last_ltc/last_doge:.2f}")
-                    print(f"My relation LTC/ ALGO {last_ltc/last_algo:.2f}")
-                    print("__ DASH __ ")
-                    print(f"My relation DASH/ ADA  {last_dash/res.last:.2f}")
-        print(f"My relation DASH/ DOGE {last_dash/last_doge:.2f}")
-        print(f"My relation DASH/ ATOM {last_dash/last_atom:.2f}")
-                    print(f"My relation DASH/ ALGO {last_dash/last_algo:.2f}")
-                    print("__ ADA __ ")
-                    print(f"My relation ADA/ DOGE {res.last/last_doge:.2f}")
-                    print(f"My relation ADA/ ALGO {res.last/last_algo:.2f}")
-                    print("__ ATOM __ ")
-                    print(f"My relation ATOM/ ADA  {last_atom/res.last:.2f}")
-                    print(f"My relation ATOM/ DOGE {last_atom/last_doge:.2f}")
-                    print(f"My relation ATOM/ ALGO {last_atom/last_algo:.2f}")
+    m = Market(pairs=params)
+    r = RelativeModel(relations=relations)
+    await asyncio.gather(listen_market(m), print_market(m, r), get_user_cmd(r))
 
 
-if __name__ == "__main__":
-    asyncio.run(main())
+asyncio.run(main())
