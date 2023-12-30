@@ -64,14 +64,15 @@ class Market(BaseModel):
 class RelativeModel(BaseModel):
     relations: dict[str, set] = Field(repr=False)
     db: dict[str, dict[str, float]] = Field(default={}, repr=True)
+    user_relation: dict[str, float] = Field(default={}, repr=True)
     _index: dict[int, str] = {}
-    user_relation: dict[str, float] = {}
 
     def __init__(self, **data) -> None:
         super().__init__(**data)
         self.init_db()
 
     def init_db(self):
+        """Create empty dicts && create indeces for user interaction"""
         ind = 1
         for pnt1 in self.relations.keys():
             self.db[pnt1] = {}
@@ -84,15 +85,20 @@ class RelativeModel(BaseModel):
         self.load_user()
 
     def fill(self, m: Market):
+        """Calculate relative cost && fill Model with data"""
         for pnt1 in self.relations.keys():
             for pnt2 in self.relations[pnt1]:
                 self.db[pnt1][pnt2] = m[pnt1] / m[pnt2]
 
     def save_user(self):
+        """Save user input data to disk"""
+        ## Blocks recv on ws.
+        ## TODO redo
         with open("./usr_data.json", mode="w") as f:
             f.write(self.model_dump_json(include={"user_relation"}))
 
     def load_user(self):
+        """Load user relations from disk"""
         try:
             with open("./usr_data.json", mode="r") as f:
                 data = json.load(f)
@@ -102,11 +108,15 @@ class RelativeModel(BaseModel):
             print(f"ERROR: {e}, during load_user function")
 
     def clear_user(self):
+        """Cleares user input"""
         for key, _ in self.user_relation.items():
             self.user_relation[key] = 0.0
 
     def fill_user(self, ind: int, value: float):
+        # we fill data on 2 steps
+        # get key selected from self._index table
         key = self._index[ind]
+        # use that key to write user data
         self.user_relation[key] = value
         self.save_user()
 
