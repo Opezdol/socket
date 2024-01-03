@@ -9,4 +9,7 @@ class User_Thread:
 
     async def __anext__(self) -> str:
         cmd = await self.loop.run_in_executor(None, sys.stdin.readline)
-        return cmd.strip()
+        cmd = cmd.strip()
+        if cmd == "q" or "Q" or "exit":
+            raise StopAsyncIteration
+        return cmd
