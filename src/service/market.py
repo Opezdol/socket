@@ -59,11 +59,11 @@ async def subscribe(params: list[str], ws: websockets.WebSocketClientProtocol) -
             break
 
 
-async def main():
+async def run_cli():
     m = Market()
     r = RelativeModel()
     await asyncio.gather(listen_market(m), print_market(m=m, r=r))
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    asyncio.run(run_cli())
