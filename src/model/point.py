@@ -12,6 +12,8 @@ POINT = Literal[
     "BCH",
     "DOT",
     "FIL",
+    "MATIC",
+    "REN",
 ]
 RELATION: dict[POINT, list[POINT]] = {
     ## dict[str:set]
@@ -23,10 +25,15 @@ RELATION: dict[POINT, list[POINT]] = {
         "XRP",
         "BCH",
         "FIL",
+        "REN",
     ],
-    "ATOM": ["ADA", "DOGE", "ALGO", "DOT", "XRP", "BCH", "FIL"],
+    "ATOM": ["ADA", "DOGE", "ALGO", "DOT", "XRP", "BCH", "FIL", "REN"],
     "ADA": ["DOGE", "ALGO"],
-    "DOT": ["FIL"],
+    "DOT": ["FIL", "MATIC", "REN"],
+    "FIL": ["MATIC", "REN"],
+    "MATIC": [
+        "REN",
+    ],
 }
 RELATION2: dict[POINT, list[POINT]] = {
     ## dict[str:set]

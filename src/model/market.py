@@ -80,5 +80,5 @@ class RelativeModel(BaseModel):
         for key in self.relations.keys():
             res += f"______{key}_____:\n"
             for itm in self.db[key]:
-                res += f"{itm} -> {self.db[key][itm]}\n"
+                res += f"{itm} \t-> {self.db[key][itm]}\n"
         return res
