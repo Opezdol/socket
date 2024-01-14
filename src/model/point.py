@@ -26,6 +26,8 @@ RELATION: dict[POINT, list[POINT]] = {
         "BCH",
         "FIL",
         "REN",
+        "MATIC",
+        "DOT",
     ],
     "ATOM": ["ADA", "DOGE", "ALGO", "DOT", "XRP", "BCH", "FIL", "REN"],
     "ADA": ["DOGE", "ALGO"],
