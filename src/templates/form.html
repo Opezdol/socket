@@ -1,0 +1,31 @@
+{% extends "index.html" %}
+
+{% block form %}
+<form action="/db" method="post" enctype=multipart/form-data>
+  <ul>
+    <li>
+      <label for="base_input">Base:</label>
+      <input type="text" id="base_input" name="base" />
+    </li>
+    <li class="button">
+      <button type="submit">Send</button>
+    </li>
+  </ul>
+  <input type="submit" name="base" />
+</form>
+
+{% endblock %}
+ <!-- 
+   <li>
+      <label for="dest">Dest:</label>
+      <input type="text" id="dest_input" name="dest" />
+    </li>
+    <li>
+      <label for="base_amount">Base_amount:</label>
+      <input type="text" id="dest_input" name="base_amount" />
+    </li>
+    <li>
+      <label for="dest_amount">Base_amount:</label>
+      <input type="text" id="dest_input" name="dest_amount" />
+    </li>
+    --!>

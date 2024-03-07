@@ -1,5 +1,6 @@
 from typing import Literal
 
+# https://youtube.com/shorts/8PqbChgNDcw?si=88jjV9yuwMnr9x5I
 POINT = Literal[
     "USDT",
     "BTC",
@@ -15,6 +16,7 @@ POINT = Literal[
     "MATIC",
     "REN",
 ]
+
 RELATION: dict[POINT, list[POINT]] = {
     ## dict[str:set]
     "LTC": [

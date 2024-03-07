@@ -1,6 +1,4 @@
 from datetime import datetime
-from inspect import Attribute
-from typing import Literal, get_args
 import json
 import websockets
 import asyncio
@@ -11,7 +9,8 @@ current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
 
-from model.market import Market, RelativeModel, Tick
+from model.market import Market, RelativeModel
+from model.tick import Tick
 
 
 ######## My globbal constants #######
@@ -23,7 +22,7 @@ async def print_market(m: Market, r: RelativeModel) -> None:
     while True:
         await asyncio.sleep(2)
         r.fill(m)
-        # print(m)
+        print(m)
         print(r)
 
 
