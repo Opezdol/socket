@@ -24,6 +24,8 @@ async def print_market(m: Market, r: RelativeModel) -> None:
         await asyncio.sleep(2)
         r.fill(m)
         # print(m)
+        for _ in range(5):
+            print()
         print(r)
 
 
