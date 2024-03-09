@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Main</title>
+<head>
+    <title>Head</title>
+    <link href="{{ url_for('static', path='/css/styles.css') }}" rel="stylesheet">
+</head></head>
+<body class="body" style="background-color:#858585">
+{% block form %}<p>This will appear if you don't set a block in the inheriting template for form.</p>{% endblock %}
+</body>
+</html>

@@ -1,30 +1,8 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
 from .point import POINT, RELATION
+from .tick import Tick
 from typing import get_args
-
-
-class Tick(BaseModel):
-    instId: str
-    askPx: float
-    askSz: float
-    bidPx: float
-    bidSz: float
-    low24h: float
-    high24h: float
-    ts: datetime
-
-    @property
-    def name(self) -> POINT:
-        return self.instId.split(sep="-")[0]
-
-    @property
-    def buy(self) -> float:
-        return self.bidPx
-
-    @property
-    def sell(self) -> float:
-        return self.askPx
 
 
 class Market(BaseModel):

@@ -1,0 +1,47 @@
+{% extends "index.html" %}
+
+{% block form %}
+<form action="http://localhost:8000/db" method="post" >
+  <ul>
+    <li>
+      <label for="base_input">[ Base:</label>
+      
+
+      <input type="text" id="base_input" name="base" required/>
+      <input type="rational" id="base_amount" name="base_amount" required/>
+      <label for="base_amount"> - amount ]</label>
+
+    </li>
+    <li>
+      <label for="dest_input">[ Dest:</label>
+      <input type="text" id="dest_input" name="dest" required/>
+      <input type="rational" id="dest_amount" name="dest_amount" required/>
+      <label for="dest_amount"> - amount ] </label>
+    </li>
+  </ul>
+  <input type="submit" name="base_n" />
+</form>
+
+{% endblock %}
+ <!-- 
+   <li>
+      <label for="dest">Dest:</label>
+      <input type="text" id="dest_input" name="dest" />
+    </li>
+    <li>
+      <label for="base_amount">Base_amount:</label>
+      <input type="text" id="dest_input" name="base_amount" />
+    </li>
+    <li>
+      <label for="dest_amount">Base_amount:</label>
+      <input type="text" id="dest_input" name="dest_amount" />
+    </ <label for="cars">Choose a car:</label>
+      <select id="cars" name="carlist" form="carform">
+        <option value="volvo">Volvo</option>
+        <option value="saab">Saab</option>
+        <option value="opel">Opel</option>
+        <option value="audi">Audi</option>
+      </select>
+
+li>enctype=multipart/form-data>
+    --!>
