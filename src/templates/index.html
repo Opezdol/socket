@@ -7,7 +7,9 @@
     <title>Head</title>
     <link href="{{ url_for('static', path='/css/styles.css') }}" rel="stylesheet">
 </head></head>
-<body class="body" style="background-color:#858585">
-{% block form %}<p>This will appear if you don't set a block in the inheriting template for form.</p>{% endblock %}
+<body class="body" style="background-color:#857585">
+  <h1>Deals logger</h1>
+{% block form %}<p>This will appear if you don't set a block in the inheriting template for <strong>form</strong>.</p>{% endblock %}
+<!--{% block deals %} <p>Thisj will appear if you dont set a block in the inheriting template for <strong>deals</strong>.</p>{% endblock %}-->
 </body>
 </html>

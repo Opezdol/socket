@@ -57,15 +57,3 @@ RELATION: dict[POINT, list[POINT]] = {
         "REN",
     ],
 }
-RELATION2: dict[POINT, list[POINT]] = {
-    ## dict[str:set]
-    "LTC": [
-        "ADA",
-        "ATOM",
-        "DOGE",
-        "ALGO",
-        "XRP",
-        "BCH",
-        "FIL",
-    ],
-}

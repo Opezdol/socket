@@ -1,0 +1,49 @@
+{% include "form.html" %}
+
+{% block deals %}
+
+<table>
+  <caption>
+    List of your investments.
+  </caption>
+  <thead>
+    <tr>
+      <th scope="col">Direction</th>
+      <th scope="col">Straight_cost</th>
+      <th scope="col">Reversed_cost</th>
+      <th scope="col">Remove</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for deal in deals %}
+    <tr>
+      <th scope="row">{{ deal.base }}-{{ deal.dest }}</th>
+      <td>{{ deal.straight }}</td>
+      <td>{{ deal.reversed }}</td>
+      <td><p><a href="javascript: deleteItem('{{ deal.id }}')">Delete</a></p></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  <tfoot>
+    <tr>
+      <th scope="row" colspan="2">Average age</th>
+      <td>33</td>
+    </tr>
+  </tfoot>
+</table>
+
+<script>
+function deleteItem(id) {
+  fetch('/db/'+id, {
+    method: 'DELETE',
+    headers: {
+    }
+  });
+  // Set timeout before reload 
+  setTimeout(function(){
+    location.reload();
+  }, 250)
+}
+</script>
+
+{% endblock %}
