@@ -1,25 +1,9 @@
-from typing import Literal
-from enum import Enum, auto
+from enum import Flag, auto
 
 # https://youtube.com/shorts/8PqbChgNDcw?si=88jjV9yuwMnr9x5I
-POINT = Literal[
-    "USDT",
-    "BTC",
-    "LTC",
-    "ADA",
-    "ATOM",
-    "ALGO",
-    "DOGE",
-    "XRP",
-    "BCH",
-    "DOT",
-    "FIL",
-    "MATIC",
-    "REN",
-]
 
 
-class Point(Enum):
+class Point(Flag):
     USDT = auto()
     BTC = auto()
     LTC = auto()
@@ -33,27 +17,17 @@ class Point(Enum):
     FIL = auto()
     MATIC = auto()
     REN = auto()
+    TON = auto()
+
+    @classmethod
+    def keys(cls) -> list[str]:
+        return [item.name for item in Point]  # type: ignore
+
+    @classmethod
+    def len(cls) -> int:
+        return Point.keys().__len__()
 
 
-RELATION: dict[POINT, list[POINT]] = {
-    ## dict[str:set]
-    "LTC": [
-        "ADA",
-        "ATOM",
-        "DOGE",
-        "ALGO",
-        "XRP",
-        "BCH",
-        "FIL",
-        "REN",
-        "MATIC",
-        "DOT",
-    ],
-    "ATOM": ["ADA", "DOGE", "ALGO", "DOT", "XRP", "BCH", "FIL", "REN"],
-    "ADA": ["DOGE", "ALGO"],
-    "DOT": ["FIL", "MATIC", "REN"],
-    "FIL": ["MATIC", "REN"],
-    "MATIC": [
-        "REN",
-    ],
-}
+if __name__ == "__main__":
+    print(Point.keys())
+    print(Point.len())

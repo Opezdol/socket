@@ -5,6 +5,7 @@ import asyncio
 import sys
 import os
 
+
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
@@ -20,7 +21,7 @@ instrm_url = "https://www.okx.com/api/v5/public/instruments"
 
 async def print_market(m: Market, r: RelativeModel) -> None:
     while True:
-        await asyncio.sleep(2)
+        await asyncio.sleep(3)
         r.fill(m)
         print(m)
         print(r)
@@ -48,9 +49,9 @@ async def subscribe(params: list[str], ws: websockets.WebSocketClientProtocol) -
     )
     print(json.dumps(subs))
     await ws.send(json.dumps(subs))
+
     _ = len(params)
     i = 0
-
     async for msg in ws:
         print(msg)
         i += 1

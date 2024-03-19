@@ -1,9 +1,8 @@
-from sqlmodel import SQLModel
 from datetime import datetime
-from .point import POINT
+from pydantic import BaseModel
 
 
-class Tick(SQLModel):
+class Tick(BaseModel):
     instId: str
     askPx: float
     askSz: float
@@ -14,7 +13,7 @@ class Tick(SQLModel):
     ts: datetime
 
     @property
-    def name(self) -> POINT:
+    def name(self) -> str:
         return self.instId.split(sep="-")[0]
 
     @property

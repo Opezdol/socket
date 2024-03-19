@@ -1,24 +1,23 @@
-from fastapi import FastAPI, Request, Form, Depends
+from asyncio import get_event_loop
+from fastapi import FastAPI, Request, Form, WebSocket
 from fastapi.responses import HTMLResponse, RedirectResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+import asyncio
 
 
 from datetime import datetime
-import json
 from random import randint
-import time
 from sqlmodel import SQLModel, Field, create_engine, Session, select
-from pydantic import TypeAdapter
 
-from typing import Annotated, Optional
+from typing import Optional
 from model.point import Point
-from model.market import Market
+from model.market import Market, RelativeModel
+from service.market import listen_market, print_market
+
 
 #### Class Definition Zone #######
 ##################################
-
-
 #  Table=true adds Deal definition to SQLModel.metadata
 class Deal(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -41,8 +40,8 @@ class Deal(SQLModel, table=True):
     # TODO market: str  # Json repr  of Market at the moment of transaction
 
 
+# FastApi app creation
 ##################################
-
 app = FastAPI(debug=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
@@ -53,22 +52,46 @@ file_name = "deals.db"
 db_url = f"sqlite:///{file_name}"
 # create engine. We have only one engine for whole app. This thing differs from Session
 engine = create_engine(db_url, echo=True)
-SQLModel.metadata.create_all(engine)
-with Session(engine) as session:
-    session.add(Deal(base="LTC", base_amount=112.2, dest="USDT", dest_amount=1000.22))
-    session.commit()
 ####################
+
+
+## INIT functions.
+## Create db_tables && add background task
+async def create_db_tables():
+    SQLModel.metadata.create_all(engine)
+
+
+m = Market()
+r = RelativeModel()
+
+
+@app.on_event("startup")
+async def on_startup():
+    await create_db_tables()
+    ## add background task
+    loop = asyncio.get_event_loop()
+    loop.create_task(listen_market(m))
+    loop.create_task(print_market(m, r))
+
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    while True:
+        await asyncio.sleep(2)
+        data = r.json()
+        await websocket.send_json(data)
 
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     with Session(engine) as session:
         statement = select(Deal)
-        res = session.exec(statement)
+        res = session.exec(statement).all()
         return templates.TemplateResponse(
-            name="deals.html",
+            name="index.html",
             request=request,
-            context={"choices": Point, "deals": res.all()},
+            context={"choices": Point, "deals": res},
         )
 
 
@@ -88,7 +111,7 @@ async def add_deal(
         dest=Point(dest).name,
         base_amount=base_amount,
         dest_amount=dest_amount,
-        id=randint(0, 1000),
+        # id=randint(0, 1000),
     )
     with Session(engine) as session:
         session.add(obj)
@@ -98,12 +121,12 @@ async def add_deal(
 
 @app.post("/db_auto")
 async def auto_fill(data: list[Deal]):
-    l = []
+    lst = []
     for item in data:
-        item.id = randint(0, 1000)
-        l.append(item)
+        # item.id = randint(0, 1000)
+        lst.append(item)
     with Session(engine) as session:
-        for item in l:
+        for item in lst:
             session.add(item)
         session.commit()
 

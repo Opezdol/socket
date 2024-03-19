@@ -1,12 +1,12 @@
 from pydantic import BaseModel, computed_field
 from datetime import datetime
-from .point import POINT
+from .point import Point
 
 
 class Deal(BaseModel):
     # id: int | None
     ts: datetime
-    dir: tuple[POINT, POINT]
+    dir: tuple[str, str]
     sold: float
     bought: float
 
@@ -18,7 +18,3 @@ class Deal(BaseModel):
     class Config:
         extra = "allow"
         json_encoders = {float: lambda v: round(v, 2)}
-
-
-class Deal_DB(Deal):
-    id: int

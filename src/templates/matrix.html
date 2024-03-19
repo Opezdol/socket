@@ -1,0 +1,56 @@
+
+{% block matrix %}
+
+<table class="beta table table-hover table-responsive">
+  <caption>
+    Market. RelationalModel
+  </caption>
+  <thead id='thead'>
+  </thead>
+  <tbody id='tbody'>
+  </tbody>
+</table>
+<script>
+  var ws = new WebSocket("ws://localhost:8000/ws");
+  ws.onmessage = function(event) {
+    // Fill head of table
+    var thead= document.getElementById('thead')
+    var tbody= document.getElementById('tbody')
+    thead.innerHTML = "";
+    tbody.innerHTML = "";
+    var row = document.createElement('tr');
+    var json_data  = JSON.parse(JSON.parse(event.data));
+    //console.log(json_data)
+    var th = document.createElement('th')
+    th.innerHTML = '#'
+    row.appendChild(th)
+    for (const key in json_data){
+      var itm = document.createElement('th')
+      itm.innerHTML = key
+      row.appendChild(itm)
+    }
+    thead.appendChild(row)
+    // fill tbody of table 
+    for (const key in json_data){
+      var tr = document.createElement("tr")
+      var th = document.createElement("th")
+      th.innerHTML=key;
+      th.classList.add("first-col");
+      tr.appendChild(th);
+      for(const k in json_data[key]){
+        var itm = document.createElement('td');
+        itm.innerHTML = json_data[k][key];
+        if(k == key){
+          itm.classList.add("table-info");
+        }
+        tr.appendChild(itm);
+      }
+      tbody.appendChild(tr);
+    }
+    
+    
+  };
+
+</script>
+
+{% endblock %}
