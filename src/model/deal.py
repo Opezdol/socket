@@ -1,20 +1,18 @@
-from pydantic import BaseModel, computed_field
+from SQLModel import SQLModel, Field
+from typing import Optional
 from datetime import datetime
 from .point import Point
 
 
-class Deal(BaseModel):
-    # id: int | None
-    ts: datetime
-    dir: tuple[str, str]
-    sold: float
-    bought: float
-
-    @computed_field(repr=True)  # type: ignore[misc]
-    @property
-    def actual_price(self) -> float:
-        return self.bought / self.sold
+class Deal(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    # date: datetime
+    base: Point
+    dest: str
+    base_amount: float
+    dest_amount: float
+    ts: Optional[datetime] = Field(default=69000)
 
     class Config:
         extra = "allow"
-        json_encoders = {float: lambda v: round(v, 2)}
+        json_encoders = {float: lambda v: round(v, 4)}

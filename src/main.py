@@ -26,18 +26,6 @@ class Deal(SQLModel, table=True):
     dest: str
     base_amount: float
     dest_amount: float
-    # market: Optional[str]
-    # time: datetime
-
-    @property
-    def straight(self) -> float:
-        return round(self.base_amount / self.dest_amount, 3)
-
-    @property
-    def reversed(self) -> float:
-        return round(self.dest_amount / self.base_amount, 3)
-
-    # TODO market: str  # Json repr  of Market at the moment of transaction
 
 
 # FastApi app creation
@@ -48,17 +36,17 @@ templates = Jinja2Templates(directory="templates")
 
 # CREATE database
 ####################
-file_name = "deals.db"
-db_url = f"sqlite:///{file_name}"
-# create engine. We have only one engine for whole app. This thing differs from Session
-engine = create_engine(db_url, echo=True)
+# file_name = "deals.db"
+# db_url = f"sqlite:///{file_name}"
+# # create engine. We have only one engine for whole app. This thing differs from Session
+# engine = create_engine(db_url, echo=True)
 ####################
 
 
-## INIT functions.
-## Create db_tables && add background task
-async def create_db_tables():
-    SQLModel.metadata.create_all(engine)
+# ## INIT functions.
+# ## Create db_tables && add background task
+# async def create_db_tables():
+#     SQLModel.metadata.create_all(engine)
 
 
 m = Market()
@@ -78,7 +66,7 @@ async def on_startup():
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     while True:
-        await asyncio.sleep(2)
+        await asyncio.sleep(1)
         data = r.json()
         await websocket.send_json(data)
 

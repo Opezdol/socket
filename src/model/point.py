@@ -7,6 +7,8 @@ class Point(Flag):
     USDT = auto()
     BTC = auto()
     LTC = auto()
+    ETC = auto()
+    ETH = auto()
     ADA = auto()
     ATOM = auto()
     ALGO = auto()
@@ -18,6 +20,12 @@ class Point(Flag):
     MATIC = auto()
     REN = auto()
     TON = auto()
+    ORDI = auto()
+    SUI = auto()
+    CETUS = auto()
+    GPT = auto()
+    ZK = auto()
+    ETHFI = auto()
 
     @classmethod
     def keys(cls) -> list[str]:
